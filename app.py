@@ -53,9 +53,6 @@ if __name__ == "__main__":
             scored = sc.SA(df, start=e.start_col).astype(float)
             #df['weight per'] = df.iloc[:,e.weight1:(e.weight1+1)].div(df.iloc[:,e.weight2:(e.weight2+1)])
             #scored = pd.concat([df.iloc[:,:(e.start_col)], df['weight per'], scored], axis = 1) 
-        print'$$$$$$$$$$$$$$$'
-        print e.save
-        print '$$$$$$$$$$$$$'
         writer = pd.ExcelWriter(e.save)
         scored.to_excel(writer, 'scored data')
         descr.to_excel(writer, 'described')
