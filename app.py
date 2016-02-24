@@ -16,6 +16,8 @@ class FindData(DataSet):
     g1 = BeginGroup('Data Upload')
     fname = FileOpenItem('Open File', ('xlsx', 'xls'))
     start_col = IntItem(' # of First Column of Data', default=1)
+    weight1 = TextItem('name of column with food dep weight')
+    weight2 = TextItem('name of column with weight before food dep')
     _g1 = EndGroup('Data Upload')
 
     g2 = BeginGroup('Optional Parameters')
@@ -40,7 +42,22 @@ if __name__ == "__main__":
     if e.fname and e.start_col: 
         df = pd.read_excel(e.fname, index_col=0, header=0)
         if e.rescore:
-            scored = sc.SA(df, start_col=e.start_col, rescore = (e.rescore+1)).astype(float)
+            scored = sc.SA(df, start=e.start_col, rescore = (e.rescore+1)).astype(float)
+        elif e.weight1 and e.weight2 in df.columns:
+            scored = sc.SA(df, start=e.start_col).astype(float)
+            df['per'] = df[e.weight1] / df[e.weight2]
+            scored = pd.concat([df['group'], df['per'], scored], axis=1)
+            group = scored.groupby('group')
+            descr = group[['% alternation', 'arm entries']].describe()
         else:
-            scored = sc.SA(df, start_col=e.start_col).astype(float)
-        scored.to_excel(e.save)
+            scored = sc.SA(df, start=e.start_col).astype(float)
+            #df['weight per'] = df.iloc[:,e.weight1:(e.weight1+1)].div(df.iloc[:,e.weight2:(e.weight2+1)])
+            #scored = pd.concat([df.iloc[:,:(e.start_col)], df['weight per'], scored], axis = 1) 
+        print'$$$$$$$$$$$$$$$'
+        print e.save
+        print '$$$$$$$$$$$$$'
+        writer = pd.ExcelWriter(e.save)
+        scored.to_excel(writer, 'scored data')
+        descr.to_excel(writer, 'described')
+        writer.save()
+

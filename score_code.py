@@ -4,7 +4,7 @@ import collections
 
 
 #function to score spontaneous alternation
-def SA(df, start_col = 8, rescore = 75, raw_data_start = 8):
+def SA(df, start = 9, rescore = 75, raw_data_start = 8):
 
     #build dataframe to hold rescored values
     infoframe = pd.DataFrame(index = df.index,
@@ -21,26 +21,26 @@ def SA(df, start_col = 8, rescore = 75, raw_data_start = 8):
 
     #score SA raw data from excel file and place in infoframe
     for index in df.index:
-        drop = df.iloc[:,start_col:(rescore)].ix[index].dropna(how='all')
+        drop = df.iloc[:, start:(rescore)].ix[index].dropna(how='all')
         if len(drop) > 4:
             alts = 0
             possible_alts = len(drop) - 3
             pers = 0
             repeat = 0
             arm_dict = {1:0, 2:0, 3:0, 4:0}
-            for n in range(1, len(drop)+1):
-                if drop[n] not in [1, 2, 3, 4]:
+            for n in range(0, len(drop)):
+                if drop.iloc[n] not in [1, 2, 3, 4]:
                     raise NameError('invalid arm entry input for subject %s on choice #%s: %s'
-                                     % (index, n, drop[n]))
-                arm_dict[drop[n]] += 1
+                                     % (index, n, drop.iloc[n]))
+                arm_dict[drop.iloc[n]] += 1
                 if n >= 2:
-                    if drop[n] == drop[n-1]:
+                    if drop.iloc[n] == drop.iloc[n-1]:
                         repeat += 1
                     if n >= 3:
-                        if drop[n] == drop[n-2]:
+                        if drop.iloc[n] == drop.iloc[n-2]:
                             pers +=1
                         if n >= 4:
-                            alt_list = [drop[n], drop[n-1], drop[n-2], drop[n-3]]
+                            alt_list = [drop.iloc[n], drop.iloc[n-1], drop.iloc[n-2], drop.iloc[n-3]]
                             alt_count = collections.Counter(alt_list).values()
                             if True not in map(lambda x: x > 1, alt_count):
                                 alts += 1
