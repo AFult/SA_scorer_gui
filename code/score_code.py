@@ -26,12 +26,20 @@ def SA(df, start = 1, rescore = 76, rescore6 = False, rescore12 = False, rescore
     #score SA raw data from excel file and place in infoframe
     for index in df.index:
         if rescore6:
-            rescore = df[rescore6].ix[index]
+            rescore = df['6min_arm'].ix[index]
+            try:
+                rescore = str(int(rescore))
+            except:
+                rescore = None
         if rescore12:
-            rescore = df[rescore12].ix[index]
-        if rescore18:
-            rescore = df[rescore24].ix[index]
-        drop = df.loc[index,start:rescore].dropna(how='all')
+            rescore = df['12min_arm'].ix[index]
+            try:
+                rescore = str(int(rescore))
+            except:
+                rescore = None
+
+        if rescore:
+            drop = df.loc[:, start:rescore].ix[index].dropna(how='all')
         if len(drop) > 4:
             alts = 0
             possible_alts = len(drop) - 3
@@ -54,8 +62,7 @@ def SA(df, start = 1, rescore = 76, rescore6 = False, rescore12 = False, rescore
                             alt_count = collections.Counter(alt_list).values()
                             if True not in map(lambda x: x > 1, alt_count):
                                 alts += 1
-            per_entry_diff = sum([float(x)/len(drop) - .25 if float(x)/len(drop) > .25
-                                  else .25 - float(x)/len(drop)
+            per_entry_diff = sum([abs(float(x)/len(drop) - .25)
                                   for x in arm_dict.values()])
             infoframe['alternations'][index] = int(alts)
             infoframe['arm entries'][index] = len(drop)
