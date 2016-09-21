@@ -33,13 +33,14 @@ class FindData(DataSet):
 if __name__ == "__main__":
     # Create QApplication
     import guidata
+    import sys
     _app = guidata.qapplication()
     e = FindData()
-    print(e)
     if e.edit():
-        print(e)
+        pass
 
     if e.fname:
+        writer = pd.ExcelWriter(e.save)
         df = pd.read_excel(e.fname, index_col=0, header=0)
 
         if df['pre_weight'].empty == False and \
@@ -57,16 +58,20 @@ if __name__ == "__main__":
         else:
             scored = sc.SA(df).astype(float)
 
-        if weight_percentage:
-            scored = pd.concat([weightpercentage, scored], axis = 1)
+        if weight_percentage.empty != True:
+            scored = pd.concat([weight_percentage, scored], axis = 1)
 
-        if 'group' in df.columns and 'per' in df.columns:
-            scored = pd.concat([df['group'], df['per'], scored], axis=1)
+        if 'group' in df.columns:
+            scored = pd.concat([df['group'], scored], axis=1)
+            scored = scored.dropna(thresh = 6, axis = 0)
             group = scored.groupby('group')
             descr = group[['% alternation', 'arm entries']].describe()
-
-        writer = pd.ExcelWriter(e.save)
-        scored.to_excel(writer, 'scored data')
-        if 'group' in df.columns and 'per' in df.columns:
+            scored.to_excel(writer, 'scored data')
             descr.to_excel(writer, 'described')
+        else:
+            scored = scored.dropna(thresh = 6, axis = 0)
+            scored.to_excel(writer, 'scored data')
+
         writer.save()
+    e.view()
+    #sys.exit(app.exec_())
