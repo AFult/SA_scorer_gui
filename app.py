@@ -33,12 +33,11 @@ class FindData(DataSet):
 if __name__ == "__main__":
     # Create QApplication
     import guidata
-    import sys
     _app = guidata.qapplication()
     e = FindData()
+    print e
     if e.edit():
-        pass
-
+        print e
     if e.fname:
         writer = pd.ExcelWriter(e.save)
         df = pd.read_excel(e.fname, index_col=0, header=0)
@@ -74,4 +73,3 @@ if __name__ == "__main__":
 
         writer.save()
     e.view()
-    #sys.exit(app.exec_())
